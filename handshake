@@ -1,0 +1,57 @@
+#include <Servo.h>
+
+Servo servo1;
+Servo servo2;
+
+/* ---- CALIBRATION VALUES ---- */
+const int SERVO_MIN = 8;     // true 0 degree
+const int SERVO_MAX = 90;    // true 90 degree
+
+int currentAngle = 0;        // logical angle (0–90)
+
+void setup() {
+  Serial.begin(9600);
+
+  servo1.attach(9);
+  servo2.attach(10);
+
+  // Start at 0°
+  servo1.write(SERVO_MIN);
+  servo2.write(SERVO_MIN);
+}
+
+void moveTo90() {
+  for (int angle = currentAngle; angle <= 90; angle++) {
+    int mappedAngle = map(angle, 0, 90, SERVO_MIN, SERVO_MAX);
+    servo1.write(mappedAngle);
+    servo2.write(mappedAngle);
+    delay(20);
+  }
+  currentAngle = 90;
+}
+
+void moveTo0() {
+  for (int angle = currentAngle; angle >= 0; angle--) {
+    int mappedAngle = map(angle, 0, 90, SERVO_MIN, SERVO_MAX);
+    servo1.write(mappedAngle);
+    servo2.write(mappedAngle);
+    delay(25);
+  }
+  currentAngle = 0;
+}
+
+void loop() {
+  if (Serial.available()) {
+    char cmd = Serial.read();
+
+    // ✌ TWO FINGERS → MOVE TO 90°
+    if (cmd == 'U' && currentAngle != 90) {
+      moveTo90();
+    }
+
+    // ☝ ONE FINGER → MOVE TO 0°
+    else if (cmd == 'D' && currentAngle != 0) {
+      moveTo0();
+    }
+  }
+}
